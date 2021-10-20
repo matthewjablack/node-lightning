@@ -32,22 +32,28 @@ export class Tx {
         // save bytes for later and unshift values back
         const bytes = reader.readBytes();
         reader.unshift(bytes);
+        console.log("test1");
 
         // check for witness marker and version flag
         const segwitBytes = reader.readBytes(2);
         let hasWitness = segwitBytes[0] === 0x00 && segwitBytes[1] === 0x01;
+        console.log("test2");
 
         // for non-witness data, we unshift the values back
         if (!hasWitness) reader.unshift(segwitBytes);
+        console.log("test3");
 
         let vinLen: number;
         let inputs: TxIn[];
         let outputs: TxOut[];
         let parsedInputs: { vinLen: number; inputs: TxIn[] };
         let parsedOutputs: { voutLen: number; outputs: TxOut[] };
+        console.log("test4");
         try {
             parsedInputs = this.parseInputs(reader);
+            console.log("test4-1");
             parsedOutputs = this.parseOutputs(reader);
+            console.log("test4-2");
         } catch (e) {
             // this throw/catch is _still_ necessary for the case where we have unsigned base transactions
             // with zero inputs and 1 output which is serialized as "0001" at bytes 4 and 5.
@@ -56,9 +62,12 @@ export class Tx {
             // see: https://github.com/bitcoin-s/bitcoin-s/blob/01d89df1b7c6bc4b1594406d54d5e6019705c654/core-test/src/test/scala/org/bitcoins/core/protocol/transaction/TransactionTest.scala#L88
             hasWitness = false;
             reader.unshift(bytes);
+            console.log("test4-11");
             parsedInputs = this.parseInputs(reader);
+            console.log("test4-12");
             parsedOutputs = this.parseOutputs(reader);
         }
+        console.log("test5");
 
         if (parsedInputs) {
             vinLen = parsedInputs.vinLen;
@@ -67,6 +76,7 @@ export class Tx {
         if (parsedOutputs) {
             outputs = parsedOutputs.outputs;
         }
+        console.log("test6");
 
         // process witness data
         if (hasWitness) {
@@ -81,8 +91,10 @@ export class Tx {
                 }
             }
         }
+        console.log("test7");
 
         const locktime = LockTime.parse(reader);
+        console.log("test8");
 
         return new Tx(version, inputs, outputs, locktime);
     }

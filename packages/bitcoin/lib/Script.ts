@@ -299,23 +299,35 @@ export class Script implements ICloneable<Script> {
         // commands that were read off the stack
         const cmds: ScriptCmd[] = [];
 
+        console.log("script1");
+
         // loop until all bytes have been read
         while (!br.eof) {
             // read the current command from the stream
             const op = br.readUInt8();
 
+            console.log("op", op);
+
+            console.log("script2");
+
             // data range between 1-75 bytes is OP_PUSHBYTES_xx and we simple
             // read the xx number of bytes off the script
             if (op >= 0x01 && op <= 0x4b) {
+                console.log("script3");
                 const n = op;
+                console.log("script3-1");
+                console.log("cmds", cmds);
                 const bytes = br.readBytes(n);
+                console.log("script3-2");
                 cmds.push(bytes);
+                console.log("script3-3");
             }
 
             // data range between 76 and 255 bytes uses OP_PUSHDATA1 and uses
             // the format with a single byte length and then the n bytes are
             // read from the script
             else if (op === OpCode.OP_PUSHDATA1) {
+                console.log("script4");
                 const n = br.readUInt8();
                 cmds.push(br.readBytes(n));
             }
@@ -324,14 +336,19 @@ export class Script implements ICloneable<Script> {
             // format with two bytes little-endian to determine the n bytes of
             // data of data that need to be read.
             else if (op === OpCode.OP_PUSHDATA2) {
+                console.log("script5");
                 const n = br.readUInt16LE();
                 cmds.push(br.readBytes(n));
             }
 
             // otherwise the value is an opcode that should be added to the cmds
             else {
+                console.log("script6");
                 cmds.push(op);
             }
+            console.log("script7");
+
+            console.log("cmds", cmds);
         }
 
         return cmds;
